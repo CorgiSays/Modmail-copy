@@ -67,6 +67,7 @@ class ModmailBot(commands.Bot):
     def __init__(self):
         self.config = ConfigManager(self)
         self.config.populate_cache()
+        self._tinum = 10000
 
         intents = discord.Intents.all()
         if not self.config["enable_presence_intent"]:
@@ -1750,6 +1751,7 @@ class ModmailBot(commands.Bot):
                 name = new_name = digest.hexdigest()[-8:]
             elif self.config["use_user_id_channel_name"]:
                 name = new_name = f'ticket-{str(self._tinum)}'
+                self._tinum += 1
             elif self.config["use_timestamp_channel_name"]:
                 name = new_name = author.created_at.isoformat(sep="-", timespec="minutes")
             else:

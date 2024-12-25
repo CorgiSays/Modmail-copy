@@ -1749,7 +1749,7 @@ class ModmailBot(commands.Bot):
                 digest = hashlib.md5(to_hash.encode("utf8"), usedforsecurity=False)
                 name = new_name = digest.hexdigest()[-8:]
             elif self.config["use_user_id_channel_name"]:
-                name = new_name = str(author.id)
+                name = new_name = f'ticket-{str(self._tinum)}'
             elif self.config["use_timestamp_channel_name"]:
                 name = new_name = author.created_at.isoformat(sep="-", timespec="minutes")
             else:

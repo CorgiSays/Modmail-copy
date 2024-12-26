@@ -489,7 +489,7 @@ class Thread:
         else:
             _closer = f"{closer} ({closer.id})"
 
-        embed.title = user
+        embed.title = f'{user} {self.channel.name}'
 
         event = "Thread Closed as Scheduled" if scheduled else "Thread Closed"
         # embed.set_author(name=f"Event: {event}", url=log_url)

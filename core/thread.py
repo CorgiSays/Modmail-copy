@@ -47,18 +47,19 @@ class CloseThreadView(View):
     async def default_close(self, interaction: discord.Interaction, button: Button):
         # Close with a default message
         await interaction.response.defer()
-        await self.thread._close()
+        await self.thread._close(closer=self.bot.user)
 
     @discord.ui.button(label="Reason1", style=discord.ButtonStyle.green)
     async def resolved_close(self, interaction: discord.Interaction, button: Button):
         # Close with a specific message
         await interaction.response.defer()
-        await self.thread._close(message="DEFAULT MESSAGE #1")
+        await self.thread._close(message="DEFAULT MESSAGE #1", closer=self.bot.user)
 
     @discord.ui.button(label="Custom", style=discord.ButtonStyle.blurple)
     async def custom_close(self, interaction: discord.Interaction, button: Button):
         # Open a modal to input a custom message
         modal = CloseMessageModal(self.thread)
+        await interaction.response.send_modal(modal)
 
 
 class CloseMessageModal(Modal):
@@ -70,7 +71,7 @@ class CloseMessageModal(Modal):
     async def on_submit(self, interaction: discord.Interaction):
         # Get the custom message or use a default
         message = self.children[0].value or "No reason provided."
-        await self.thread._close(message=message)
+        await self.thread._close(message=message, closer=self.bot.user)
 
 
 class Thread:

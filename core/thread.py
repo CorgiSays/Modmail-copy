@@ -43,17 +43,29 @@ class CloseThreadView(View):
         super().__init__(timeout=None)  # Timeout set to None for persistent buttons
         self.thread = thread
 
-    @discord.ui.button(label="Close", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="Default", style=discord.ButtonStyle.grey)
     async def default_close(self, interaction: discord.Interaction, button: Button):
         # Close with a default message
         await interaction.response.defer()
         await self.thread._close(closer=interaction.user)
 
-    @discord.ui.button(label="Reason1", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Resolved", style=discord.ButtonStyle.green)
     async def resolved_close(self, interaction: discord.Interaction, button: Button):
         # Close with a specific message
         await interaction.response.defer()
-        await self.thread._close(message="DEFAULT MESSAGE #1", closer=interaction.user)
+        await self.thread._close(message="This ticket has been deemed as resolved. You are free to open another ticket if you wish. Transcripts are available upon request from the staff team.", closer=interaction.user)
+
+    @discord.ui.button(label="Banned", style=discord.ButtonStyle.red)
+    async def resolved_close(self, interaction: discord.Interaction, button: Button):
+        # Close with a specific message
+        await interaction.response.defer()
+        await self.thread._close(message="The individual being reported will be punished accordingly. Thank you for your report. Transcripts are available upon request from the staff team.", closer=interaction.user)
+
+    @discord.ui.button(label="Appeal", style=discord.ButtonStyle.green)
+    async def resolved_close(self, interaction: discord.Interaction, button: Button):
+        # Close with a specific message
+        await interaction.response.defer()
+        await self.thread._close(message="You are able to appeal a ban through [this](https://airtable.com/shrecWmROFcmPradw) form. A verdict can be viewed [here](https://airtable.com/shrHNPtJBGePOztDJ/tbl4b4L2GN2fKKurF) Transcripts are available upon request from the staff team.", closer=interaction.user)
 
     @discord.ui.button(label="Custom", style=discord.ButtonStyle.blurple)
     async def custom_close(self, interaction: discord.Interaction, button: Button):
@@ -976,7 +988,7 @@ class Thread:
 
         embed = discord.Embed(description=message.content)
         if self.bot.config["show_timestamp"]:
-            embed.timestamp = message.created_at
+            timestampsaved = message.created_at
 
         system_avatar_url = "https://discordapp.com/assets/f78426a064bc9dd24847519259bc42af.png"
 
@@ -1147,8 +1159,10 @@ class Thread:
                 if mod_tag is None:
                     mod_tag = str(get_top_role(message.author, self.bot.config["use_hoisted_top_role"]))
                 embed.set_footer(text=mod_tag)  # Normal messages
+                embed.timestamp = timestampsaved
             else:
                 embed.set_footer(text=self.bot.config["anon_tag"])
+                embed.timestamp = timestampsaved
         elif note:
             embed.colour = self.bot.main_color
         else:

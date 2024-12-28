@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import isodate
 
 import discord
+from discord.ui import View, Button, Modal, TextInput
 from discord.ext.commands import MissingRequiredArgument, CommandError
 from lottie.importers import importers as l_importers
 from lottie.exporters import exporters as l_exporters
@@ -36,6 +37,53 @@ from core.utils import (
 )
 
 logger = getLogger(__name__)
+
+class CloseThreadView(View):
+    def __init__(self, thread):
+        super().__init__(timeout=None)  # Timeout set to None for persistent buttons
+        self.thread = thread
+
+    @discord.ui.button(label="Default", style=discord.ButtonStyle.grey)
+    async def default_close(self, interaction: discord.Interaction, button: Button):
+        # Close with a default message
+        await interaction.response.defer()
+        await self.thread._close(closer=interaction.user)
+
+    @discord.ui.button(label="Resolved", style=discord.ButtonStyle.green)
+    async def resolved_close(self, interaction: discord.Interaction, button: Button):
+        # Close with a specific message
+        await interaction.response.defer()
+        await self.thread._close(message="This ticket has been deemed as resolved. You are free to open another ticket if you wish. Transcripts are available upon request from the staff team.", closer=interaction.user)
+
+    @discord.ui.button(label="Banned", style=discord.ButtonStyle.red)
+    async def resolved_close(self, interaction: discord.Interaction, button: Button):
+        # Close with a specific message
+        await interaction.response.defer()
+        await self.thread._close(message="The individual being reported will be punished accordingly. Thank you for your report. Transcripts are available upon request from the staff team.", closer=interaction.user)
+
+    @discord.ui.button(label="Appeal", style=discord.ButtonStyle.green)
+    async def resolved_close(self, interaction: discord.Interaction, button: Button):
+        # Close with a specific message
+        await interaction.response.defer()
+        await self.thread._close(message="You are able to appeal a ban through [this](https://airtable.com/shrecWmROFcmPradw) form. A verdict can be viewed [here](https://airtable.com/shrHNPtJBGePOztDJ/tbl4b4L2GN2fKKurF) Transcripts are available upon request from the staff team.", closer=interaction.user)
+
+    @discord.ui.button(label="Custom", style=discord.ButtonStyle.blurple)
+    async def custom_close(self, interaction: discord.Interaction, button: Button):
+        # Open a modal to input a custom message
+        modal = CloseMessageModal(self.thread)
+        await interaction.response.send_modal(modal)
+
+
+class CloseMessageModal(Modal):
+    def __init__(self, thread):
+        super().__init__(title="Close Reason")
+        self.thread = thread
+        self.add_item(TextInput(label="Close Reason", placeholder="Enter your close message here", required=False))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        # Get the custom message or use a default
+        message = self.children[0].value or "No reason provided."
+        await self.thread._close(message=message, closer=interaction.user)
 
 
 class Thread:
@@ -209,7 +257,8 @@ class Thread:
         async def send_genesis_message():
             info_embed = self._format_info_embed(recipient, log_url, log_count, self.bot.main_color)
             try:
-                msg = await channel.send(mention, embed=info_embed)
+                view = CloseThreadView(self)
+                msg = await channel.send(mention, embed=info_embed, view=view)
                 self.bot.loop.create_task(msg.pin())
                 self._genesis_message = msg
             except Exception:
@@ -334,11 +383,6 @@ class Thread:
 
         embed = discord.Embed(color=color, description=user.mention, timestamp=time)
 
-        if user.dm_channel:
-            footer = f"User ID: {user.id} • DM ID: {user.dm_channel.id}"
-        else:
-            footer = f"User ID: {user.id}"
-
         if member is not None:
             embed.set_author(name=str(user), icon_url=member.display_avatar.url, url=log_url)
 
@@ -350,10 +394,8 @@ class Thread:
                 embed.add_field(name="Nickname", value=member.nick, inline=True)
             if role_names:
                 embed.add_field(name="Roles", value=role_names, inline=True)
-            embed.set_footer(text=footer)
         else:
             embed.set_author(name=str(user), icon_url=user.display_avatar.url, url=log_url)
-            embed.set_footer(text=f"{footer} • (not in main server)")
 
         embed.description += ", ".join(user_info)
 
@@ -489,7 +531,7 @@ class Thread:
         else:
             _closer = f"{closer} ({closer.id})"
 
-        embed.title = user
+        embed.title = f'{user} {self.channel.name}'
 
         event = "Thread Closed as Scheduled" if scheduled else "Thread Closed"
         # embed.set_author(name=f"Event: {event}", url=log_url)
@@ -946,7 +988,7 @@ class Thread:
 
         embed = discord.Embed(description=message.content)
         if self.bot.config["show_timestamp"]:
-            embed.timestamp = message.created_at
+            timestampsaved = message.created_at
 
         system_avatar_url = "https://discordapp.com/assets/f78426a064bc9dd24847519259bc42af.png"
 
@@ -1110,19 +1152,20 @@ class Thread:
             embed.colour = self.bot.mod_color
             # Anonymous reply sent in thread channel
             if anonymous and isinstance(destination, discord.TextChannel):
-                embed.set_footer(text="Anonymous Reply")
+                pass
             # Normal messages
             elif not anonymous:
                 mod_tag = self.bot.config["mod_tag"]
                 if mod_tag is None:
                     mod_tag = str(get_top_role(message.author, self.bot.config["use_hoisted_top_role"]))
                 embed.set_footer(text=mod_tag)  # Normal messages
+                embed.timestamp = timestampsaved
             else:
                 embed.set_footer(text=self.bot.config["anon_tag"])
+                embed.timestamp = timestampsaved
         elif note:
             embed.colour = self.bot.main_color
         else:
-            embed.set_footer(text=f"Message ID: {message.id}")
             embed.colour = self.bot.recipient_color
 
         if (from_mod or note) and not thread_creation:

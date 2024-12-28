@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import isodate
 
 import discord
+from discord.ui import View, Button, Modal, TextInput
 from discord.ext.commands import MissingRequiredArgument, CommandError
 from lottie.importers import importers as l_importers
 from lottie.exporters import exporters as l_exporters
@@ -36,6 +37,40 @@ from core.utils import (
 )
 
 logger = getLogger(__name__)
+
+class CloseThreadView(View):
+    def __init__(self, thread):
+        super().__init__(timeout=None)  # Timeout set to None for persistent buttons
+        self.thread = thread
+
+    @discord.ui.button(label="Close", style=discord.ButtonStyle.red)
+    async def default_close(self, interaction: discord.Interaction, button: Button):
+        # Close with a default message
+        await interaction.response.defer()
+        await self.thread._close()
+
+    @discord.ui.button(label="Reason1", style=discord.ButtonStyle.green)
+    async def resolved_close(self, interaction: discord.Interaction, button: Button):
+        # Close with a specific message
+        await interaction.response.defer()
+        await self.thread._close(message="DEFAULT MESSAGE #1")
+
+    @discord.ui.button(label="Custom", style=discord.ButtonStyle.blurple)
+    async def custom_close(self, interaction: discord.Interaction, button: Button):
+        # Open a modal to input a custom message
+        modal = CloseMessageModal(self.thread)
+
+
+class CloseMessageModal(Modal):
+    def __init__(self, thread):
+        super().__init__(title="Close Reason")
+        self.thread = thread
+        self.add_item(TextInput(label="Close Reason", placeholder="Enter your close message here", required=False))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        # Get the custom message or use a default
+        message = self.children[0].value or "No reason provided."
+        await self.thread._close(message=message)
 
 
 class Thread:
@@ -209,7 +244,8 @@ class Thread:
         async def send_genesis_message():
             info_embed = self._format_info_embed(recipient, log_url, log_count, self.bot.main_color)
             try:
-                msg = await channel.send(mention, embed=info_embed)
+                view = CloseThreadView(self)
+                msg = await channel.send(mention, embed=info_embed, view=view)
                 self.bot.loop.create_task(msg.pin())
                 self._genesis_message = msg
             except Exception:
@@ -334,11 +370,6 @@ class Thread:
 
         embed = discord.Embed(color=color, description=user.mention, timestamp=time)
 
-        if user.dm_channel:
-            footer = f"User ID: {user.id} • DM ID: {user.dm_channel.id}"
-        else:
-            footer = f"User ID: {user.id}"
-
         if member is not None:
             embed.set_author(name=str(user), icon_url=member.display_avatar.url, url=log_url)
 
@@ -350,10 +381,8 @@ class Thread:
                 embed.add_field(name="Nickname", value=member.nick, inline=True)
             if role_names:
                 embed.add_field(name="Roles", value=role_names, inline=True)
-            embed.set_footer(text=footer)
         else:
             embed.set_author(name=str(user), icon_url=user.display_avatar.url, url=log_url)
-            embed.set_footer(text=f"{footer} • (not in main server)")
 
         embed.description += ", ".join(user_info)
 

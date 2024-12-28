@@ -67,7 +67,7 @@ class ModmailBot(commands.Bot):
     def __init__(self):
         self.config = ConfigManager(self)
         self.config.populate_cache()
-        self._tinum = 10030
+        self._tinum = 10100
 
         intents = discord.Intents.all()
         if not self.config["enable_presence_intent"]:
@@ -1450,12 +1450,6 @@ class ModmailBot(commands.Bot):
             message = message[0]
             embed = message.embeds[0]
 
-            if embed.footer.icon:
-                icon_url = embed.footer.icon.url
-            else:
-                icon_url = None
-
-            embed.set_footer(text=f"{embed.footer.text} (deleted)", icon_url=icon_url)
             await message.edit(embed=embed)
             return
 
@@ -1477,7 +1471,6 @@ class ModmailBot(commands.Bot):
                 return
         except discord.NotFound:
             return
-        embed.set_footer(text=f"Message ID: {message.id} from {message.author}.")
         return await message.channel.send(embed=embed)
 
     async def on_bulk_message_delete(self, messages):
@@ -1501,7 +1494,6 @@ class ModmailBot(commands.Bot):
                 await self.add_reaction(after, blocked_emoji)
             else:
                 embed = discord.Embed(description="Successfully Edited Message", color=self.main_color)
-                embed.set_footer(text=f"Message ID: {after.id}")
                 await after.channel.send(embed=embed)
 
     async def on_error(self, event_method, *args, **kwargs):

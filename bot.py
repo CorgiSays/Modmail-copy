@@ -67,7 +67,7 @@ class ModmailBot(commands.Bot):
     def __init__(self):
         self.config = ConfigManager(self)
         self.config.populate_cache()
-        self._tinum = 69696
+        self._tinum = 400000
 
         intents = discord.Intents.all()
         if not self.config["enable_presence_intent"]:

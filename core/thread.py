@@ -47,13 +47,13 @@ class CloseThreadView(View):
     async def default_close(self, interaction: discord.Interaction, button: Button):
         # Close with a default message
         await interaction.response.defer()
-        await self.thread._close(closer=self.bot.user)
+        await self.thread._close(closer=interaction.user)
 
     @discord.ui.button(label="Reason1", style=discord.ButtonStyle.green)
     async def resolved_close(self, interaction: discord.Interaction, button: Button):
         # Close with a specific message
         await interaction.response.defer()
-        await self.thread._close(message="DEFAULT MESSAGE #1", closer=self.bot.user)
+        await self.thread._close(message="DEFAULT MESSAGE #1", closer=interaction.user)
 
     @discord.ui.button(label="Custom", style=discord.ButtonStyle.blurple)
     async def custom_close(self, interaction: discord.Interaction, button: Button):
@@ -71,7 +71,7 @@ class CloseMessageModal(Modal):
     async def on_submit(self, interaction: discord.Interaction):
         # Get the custom message or use a default
         message = self.children[0].value or "No reason provided."
-        await self.thread._close(message=message, closer=self.bot.user)
+        await self.thread._close(message=message, closer=interaction.user)
 
 
 class Thread:
@@ -1140,7 +1140,7 @@ class Thread:
             embed.colour = self.bot.mod_color
             # Anonymous reply sent in thread channel
             if anonymous and isinstance(destination, discord.TextChannel):
-                embed.set_footer(text="Anonymous Reply")
+                pass
             # Normal messages
             elif not anonymous:
                 mod_tag = self.bot.config["mod_tag"]
@@ -1152,7 +1152,6 @@ class Thread:
         elif note:
             embed.colour = self.bot.main_color
         else:
-            embed.set_footer(text=f"Message ID: {message.id}")
             embed.colour = self.bot.recipient_color
 
         if (from_mod or note) and not thread_creation:

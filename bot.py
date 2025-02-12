@@ -1745,7 +1745,7 @@ class ModmailBot(commands.Bot):
                 numerirangerculture = self.config.get('ticket_number')
                 name = new_name = f'ticket-{str(numerirangerculture)}'
                 self.config.set('ticket_number', self.config.get('ticket_number') + 1)
-                await self.config.update()
+                self.config.update()
             elif self.config["use_timestamp_channel_name"]:
                 name = new_name = author.created_at.isoformat(sep="-", timespec="minutes")
             else:

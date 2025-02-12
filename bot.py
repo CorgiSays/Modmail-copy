@@ -1742,7 +1742,8 @@ class ModmailBot(commands.Bot):
                 digest = hashlib.md5(to_hash.encode("utf8"), usedforsecurity=False)
                 name = new_name = digest.hexdigest()[-8:]
             elif self.config["use_user_id_channel_name"]:
-                name = new_name = f'ticket-{str(self.config.get('ticket_number'))}'
+                numerirangerculture = self.config.get('ticket_number')
+                name = new_name = f'ticket-{str(numerirangerculture)}'
                 self.config.set('ticket_number', self.config.get('ticket_number') + 1)
                 await self.config.update()
             elif self.config["use_timestamp_channel_name"]:

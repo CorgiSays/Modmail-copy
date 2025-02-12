@@ -67,7 +67,7 @@ class ModmailBot(commands.Bot):
     def __init__(self):
         self.config = ConfigManager(self)
         self.config.populate_cache()
-        self._tinum = 10079
+        self._tinum = self.config.get('ticket_number')
 
         intents = discord.Intents.all()
         if not self.config["enable_presence_intent"]:
@@ -1742,10 +1742,8 @@ class ModmailBot(commands.Bot):
                 digest = hashlib.md5(to_hash.encode("utf8"), usedforsecurity=False)
                 name = new_name = digest.hexdigest()[-8:]
             elif self.config["use_user_id_channel_name"]:
-                numerirangerculture = self.config.get('ticket_number')
-                name = new_name = f'ticket-{str(numerirangerculture)}'
-                self.config.set('ticket_number', self.config.get('ticket_number') + 1)
-                self.config.update()
+                name = new_name = f'ticket-{str(self._tinum)}'
+                self._tinum += 1
             elif self.config["use_timestamp_channel_name"]:
                 name = new_name = author.created_at.isoformat(sep="-", timespec="minutes")
             else:

@@ -56,6 +56,7 @@ class ConfigManager:
         "use_random_channel_name": False,
         "recipient_thread_close": False,
         "thread_show_roles": True,
+        "ticket_number": 10995,
         "thread_show_account_age": True,
         "thread_show_join_age": True,
         "thread_cancelled": "Cancelled",

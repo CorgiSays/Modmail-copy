@@ -138,26 +138,31 @@ class CloseSurveyModal(Modal):
         self.add_item(self.suggestions)
         self.add_item(self.kudos)
 
-        async def on_submit(self, interaction: discord.Interaction):
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
             user = interaction.user
-    
-            GUILD_ID = 626147748067934218
-            LOG_CHANNEL_ID = 1341681611103670326
-    
+
+            # Manually define the Guild and Log Channel IDs
+            GUILD_ID = 626147748067934218  # Replace with your actual Guild ID
+            LOG_CHANNEL_ID = 1341681611103670326  # Replace with your actual Log Channel ID
+
+            # Fetch the guild manually (since this is always submitted in DMs)
             guild = interaction.client.get_guild(GUILD_ID)
             if guild is None:
                 await interaction.response.send_message(
                     "Error: Could not find the logging guild. Please contact staff.", ephemeral=True
                 )
                 return
-    
+
+            # Fetch the log channel
             log_channel = guild.get_channel(LOG_CHANNEL_ID)
             if log_channel is None:
                 await interaction.response.send_message(
                     "Error: Could not find the log channel. Please contact staff.", ephemeral=True
                 )
                 return
-    
+
+            # Create the survey log embed
             embed = discord.Embed(
                 title="📋 Ticket Survey Received",
                 color=discord.Color.green(),
@@ -170,10 +175,19 @@ class CloseSurveyModal(Modal):
             embed.add_field(name="**Suggestions/Complaints**", value=self.suggestions.value or "None", inline=False)
             embed.add_field(name="**Staff Kudos**", value=self.kudos.value or "None", inline=False)
             embed.set_footer(text=f"User ID: {user.id}")
-    
+
+            # Send the embed to the log channel
             await log_channel.send(embed=embed)
-    
-            await interaction.response.send_message("Thank you for your feedback!", ephemeral=True)
+
+            # Confirm submission to the user
+            await interaction.response.send_message("Thank you for your feedback! It has been logged.", ephemeral=True)
+
+        except Exception as e:
+            print(f"Error submitting survey: {e}")
+            await interaction.response.send_message(
+                "An error occurred while submitting your feedback. Please try again later.", ephemeral=True
+            )
+
 
 
 class Thread:

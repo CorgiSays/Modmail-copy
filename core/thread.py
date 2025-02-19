@@ -53,19 +53,19 @@ class CloseThreadView(View):
     async def resolved_close(self, interaction: discord.Interaction, button: Button):
         # Close with a specific message
         await interaction.response.defer()
-        await self.thread._close(message="This ticket has been deemed as resolved. You are free to open another ticket if you wish. Transcripts are available upon request from the staff team.", closer=interaction.user)
+        await self.thread._close(message="This ticket has been deemed as resolved. You are free to open another ticket if you wish. If you would like to anonymously give feedback on the ticket system or this specific ticket, you may do so through the ticket close survey attached.", closer=interaction.user)
 
     @discord.ui.button(label="Banned", style=discord.ButtonStyle.red)
     async def banned_close(self, interaction: discord.Interaction, button: Button):
         # Close with a specific message
         await interaction.response.defer()
-        await self.thread._close(message="The individual being reported will be punished accordingly. Thank you for your report. Transcripts are available upon request from the staff team.", closer=interaction.user)
+        await self.thread._close(message="The individual being reported will be punished accordingly. Thank you for your report. If you would like to anonymously give feedback on the ticket system or this specific ticket, you may do so through the ticket close survey attached.", closer=interaction.user)
 
     @discord.ui.button(label="Appeal", style=discord.ButtonStyle.green)
     async def appeal_close(self, interaction: discord.Interaction, button: Button):
         # Close with a specific message
         await interaction.response.defer()
-        await self.thread._close(message="You are able to appeal a ban through [this](https://airtable.com/shrecWmROFcmPradw) form. A verdict can be viewed [here](https://airtable.com/shrHNPtJBGePOztDJ/tbl4b4L2GN2fKKurF) Transcripts are available upon request from the staff team.", closer=interaction.user)
+        await self.thread._close(message="You are able to appeal a ban through [this](https://airtable.com/shrecWmROFcmPradw) form. A verdict can be viewed [here](https://airtable.com/shrHNPtJBGePOztDJ/tbl4b4L2GN2fKKurF). If you would like to anonymously give feedback on the ticket system or this specific ticket, you may do so through the ticket close survey attached.", closer=interaction.user)
 
     @discord.ui.button(label="Custom", style=discord.ButtonStyle.blurple)
     async def custom_close(self, interaction: discord.Interaction, button: Button):
@@ -83,6 +83,7 @@ class CloseMessageModal(Modal):
     async def on_submit(self, interaction: discord.Interaction):
         # Get the custom message or use a default
         message = self.children[0].value or "No reason provided."
+        message = message + "If you would like to anonymously give feedback on the ticket system or this specific ticket, you may do so through the ticket close survey attached."
         await self.thread._close(message=message, closer=interaction.user)
         await interaction.response.defer()
 

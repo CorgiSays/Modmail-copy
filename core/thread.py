@@ -91,7 +91,7 @@ class CloseSurveyView(View):
         super().__init__(timeout=None)
         self.thread = thread
 
-    @discord.ui.button(label="Give Feedback", style=ButtonStyle.blurple)
+    @discord.ui.button(label="Give Feedback", style=discord.ButtonStyle.blurple)
     async def submit_survey(self, interaction: discord.Interaction, button: discord.ui.Button):
         modal = CloseSurveyModal(self.thread)
         await interaction.response.send_modal(modal)

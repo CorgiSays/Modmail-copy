@@ -127,7 +127,7 @@ class CloseSurveyModal(Modal):
         )
 
         self.kudos = TextInput(
-            label="Would you like to commend or criticize a staff member?",
+            label="Do you have any comments about any staff?",
             placeholder="Enter their name if known",
             required=False
         )

@@ -180,7 +180,7 @@ class CloseSurveyModal(Modal):
             await log_channel.send(embed=embed)
 
             # Confirm submission to the user
-            await interaction.response.send_message("Thank you for your feedback! It has been logged.", ephemeral=True)
+            await interaction.response.send_message("Thank you for your feedback!", ephemeral=True)
 
         except Exception as e:
             print(f"Error submitting survey: {e}")

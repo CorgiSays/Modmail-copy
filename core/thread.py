@@ -115,8 +115,8 @@ class CloseSurveyModal(Modal):
         )
 
         self.speed = TextInput(
-            label="Were ticket speeds satisfactory?",
-            placeholder="yes / no; If no, specify roughly how long it took for responses.",
+            label="Was the response speed satisfactory?",
+            placeholder="yes / no; If no, how long did it take?",
             required=True
         )
 
@@ -134,6 +134,7 @@ class CloseSurveyModal(Modal):
 
         self.add_item(self.rating)
         self.add_item(self.resolved)
+        self.add_item(self.speed)
         self.add_item(self.suggestions)
         self.add_item(self.kudos)
 
@@ -149,6 +150,7 @@ class CloseSurveyModal(Modal):
         embed.set_author(name=f"{user.name}#{user.discriminator}", icon_url=user.display_avatar.url)
         embed.add_field(name="**Support Quality Rating**", value=self.rating.value, inline=False)
         embed.add_field(name="**Issue Resolved**", value=self.resolved.value, inline=False)
+        embed.add_field(name="**Speed**", value=self.speed.value, inline=False)
         embed.add_field(name="**Suggestions/Complaints**", value=self.suggestions.value or "None", inline=False)
         embed.add_field(name="**Staff Kudos**", value=self.kudos.value or "None", inline=False)
         embed.set_footer(text=f"User ID: {user.id}")

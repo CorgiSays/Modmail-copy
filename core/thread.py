@@ -139,41 +139,41 @@ class CloseSurveyModal(Modal):
         self.add_item(self.kudos)
 
         async def on_submit(self, interaction: discord.Interaction):
-        user = interaction.user
-
-        GUILD_ID = 626147748067934218
-        LOG_CHANNEL_ID = 1341681611103670326
-
-        guild = interaction.client.get_guild(GUILD_ID)
-        if guild is None:
-            await interaction.response.send_message(
-                "Error: Could not find the logging guild. Please contact staff.", ephemeral=True
+            user = interaction.user
+    
+            GUILD_ID = 626147748067934218
+            LOG_CHANNEL_ID = 1341681611103670326
+    
+            guild = interaction.client.get_guild(GUILD_ID)
+            if guild is None:
+                await interaction.response.send_message(
+                    "Error: Could not find the logging guild. Please contact staff.", ephemeral=True
+                )
+                return
+    
+            log_channel = guild.get_channel(LOG_CHANNEL_ID)
+            if log_channel is None:
+                await interaction.response.send_message(
+                    "Error: Could not find the log channel. Please contact staff.", ephemeral=True
+                )
+                return
+    
+            embed = discord.Embed(
+                title="📋 Ticket Survey Received",
+                color=discord.Color.green(),
+                timestamp=discord.utils.utcnow()
             )
-            return
-
-        log_channel = guild.get_channel(LOG_CHANNEL_ID)
-        if log_channel is None:
-            await interaction.response.send_message(
-                "Error: Could not find the log channel. Please contact staff.", ephemeral=True
-            )
-            return
-
-        embed = discord.Embed(
-            title="📋 Ticket Survey Received",
-            color=discord.Color.green(),
-            timestamp=discord.utils.utcnow()
-        )
-        embed.set_author(name=f"{user.name}#{user.discriminator}", icon_url=user.display_avatar.url)
-        embed.add_field(name="**Support Quality Rating**", value=self.rating.value, inline=False)
-        embed.add_field(name="**Issue Resolved**", value=self.resolved.value, inline=False)
-        embed.add_field(name="**Speed**", value=self.speed.value, inline=False)
-        embed.add_field(name="**Suggestions/Complaints**", value=self.suggestions.value or "None", inline=False)
-        embed.add_field(name="**Staff Kudos**", value=self.kudos.value or "None", inline=False)
-        embed.set_footer(text=f"User ID: {user.id}")
-
-        await log_channel.send(embed=embed)
-
-        await interaction.response.send_message("Thank you for your feedback!", ephemeral=True)
+            embed.set_author(name=f"{user.name}#{user.discriminator}", icon_url=user.display_avatar.url)
+            embed.add_field(name="**Support Quality Rating**", value=self.rating.value, inline=False)
+            embed.add_field(name="**Issue Resolved**", value=self.resolved.value, inline=False)
+            embed.add_field(name="**Speed**", value=self.speed.value, inline=False)
+            embed.add_field(name="**Suggestions/Complaints**", value=self.suggestions.value or "None", inline=False)
+            embed.add_field(name="**Staff Kudos**", value=self.kudos.value or "None", inline=False)
+            embed.set_footer(text=f"User ID: {user.id}")
+    
+            await log_channel.send(embed=embed)
+    
+            await interaction.response.send_message("Thank you for your feedback!", ephemeral=True)
 
 
 class Thread:

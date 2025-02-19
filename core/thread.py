@@ -103,24 +103,30 @@ class CloseSurveyModal(Modal):
 
         self.rating = TextInput(
             label="How would you rate the support quality?",
-            placeholder="Enter a number from 1 (poor) to 5 (excellent)",
+            placeholder="1 (terrible) to 10 (outstanding)",
             required=True
         )
 
         self.resolved = TextInput(
             label="Was your issue resolved?",
-            placeholder="Yes / No",
+            placeholder="yes / no",
+            required=True
+        )
+
+        self.speed = TextInput(
+            label="Were ticket speeds satisfactory?",
+            placeholder="yes / no; If no, specify roughly how long it took for responses.",
             required=True
         )
 
         self.suggestions = TextInput(
-            label="Do you have any suggestions or complaints?",
+            label="Do you have any feedback?",
             placeholder="Share any feedback you have",
             required=False
         )
 
         self.kudos = TextInput(
-            label="Would you like to commend a staff member?",
+            label="Would you like to commend or criticize a staff member?",
             placeholder="Enter their name if known",
             required=False
         )
@@ -132,7 +138,7 @@ class CloseSurveyModal(Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         user = interaction.user
-        log_channel = interaction.guild.get_channel('1341681611103670326')
+        log_channel = interaction.guild.get_channel(1341681611103670326)
 
         embed = discord.Embed(
             title="Ticket Survey Received",

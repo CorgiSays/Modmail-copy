@@ -138,12 +138,28 @@ class CloseSurveyModal(Modal):
         self.add_item(self.suggestions)
         self.add_item(self.kudos)
 
-    async def on_submit(self, interaction: discord.Interaction):
+        async def on_submit(self, interaction: discord.Interaction):
         user = interaction.user
-        log_channel = interaction.guild.get_channel(1341681611103670326)
+
+        GUILD_ID = 626147748067934218
+        LOG_CHANNEL_ID = 1341681611103670326
+
+        guild = interaction.client.get_guild(GUILD_ID)
+        if guild is None:
+            await interaction.response.send_message(
+                "Error: Could not find the logging guild. Please contact staff.", ephemeral=True
+            )
+            return
+
+        log_channel = guild.get_channel(LOG_CHANNEL_ID)
+        if log_channel is None:
+            await interaction.response.send_message(
+                "Error: Could not find the log channel. Please contact staff.", ephemeral=True
+            )
+            return
 
         embed = discord.Embed(
-            title="Ticket Survey Received",
+            title="📋 Ticket Survey Received",
             color=discord.Color.green(),
             timestamp=discord.utils.utcnow()
         )
@@ -155,8 +171,7 @@ class CloseSurveyModal(Modal):
         embed.add_field(name="**Staff Kudos**", value=self.kudos.value or "None", inline=False)
         embed.set_footer(text=f"User ID: {user.id}")
 
-        if log_channel:
-            await log_channel.send(embed=embed)
+        await log_channel.send(embed=embed)
 
         await interaction.response.send_message("Thank you for your feedback!", ephemeral=True)
 

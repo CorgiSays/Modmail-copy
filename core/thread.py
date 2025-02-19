@@ -86,6 +86,71 @@ class CloseMessageModal(Modal):
         await self.thread._close(message=message, closer=interaction.user)
         await interaction.response.defer()
 
+class CloseSurveyView(View):
+    def __init__(self, thread):
+        super().__init__(timeout=None)
+        self.thread = thread
+
+    @discord.ui.button(label="Give Feedback", style=ButtonStyle.blurple)
+    async def submit_survey(self, interaction: discord.Interaction, button: discord.ui.Button):
+        modal = CloseSurveyModal(self.thread)
+        await interaction.response.send_modal(modal)
+
+class CloseSurveyModal(Modal):
+    def __init__(self, thread):
+        super().__init__(title="Ticket Close Survey")
+        self.thread = thread
+
+        self.rating = TextInput(
+            label="How would you rate the support quality?",
+            placeholder="Enter a number from 1 (poor) to 5 (excellent)",
+            required=True
+        )
+
+        self.resolved = TextInput(
+            label="Was your issue resolved?",
+            placeholder="Yes / No",
+            required=True
+        )
+
+        self.suggestions = TextInput(
+            label="Do you have any suggestions or complaints?",
+            placeholder="Share any feedback you have",
+            required=False
+        )
+
+        self.kudos = TextInput(
+            label="Would you like to commend a staff member?",
+            placeholder="Enter their name if known",
+            required=False
+        )
+
+        self.add_item(self.rating)
+        self.add_item(self.resolved)
+        self.add_item(self.suggestions)
+        self.add_item(self.kudos)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        user = interaction.user
+        log_channel = interaction.guild.get_channel('1341681611103670326')
+
+        embed = discord.Embed(
+            title="Ticket Survey Received",
+            color=discord.Color.green(),
+            timestamp=discord.utils.utcnow()
+        )
+        embed.set_author(name=f"{user.name}#{user.discriminator}", icon_url=user.display_avatar.url)
+        embed.add_field(name="**Support Quality Rating**", value=self.rating.value, inline=False)
+        embed.add_field(name="**Issue Resolved**", value=self.resolved.value, inline=False)
+        embed.add_field(name="**Suggestions/Complaints**", value=self.suggestions.value or "None", inline=False)
+        embed.add_field(name="**Staff Kudos**", value=self.kudos.value or "None", inline=False)
+        embed.set_footer(text=f"User ID: {user.id}")
+
+        if log_channel:
+            await log_channel.send(embed=embed)
+
+        await interaction.response.send_message("Thank you for your feedback!", ephemeral=True)
+
 
 class Thread:
     """Represents a discord Modmail thread"""
@@ -582,7 +647,7 @@ class Thread:
                     embed.description = message
 
                 if user is not None:
-                    tasks.append(user.send(embed=embed))
+                    tasks.append(user.send(embed=embed, view=CloseSurveyView(self)))
 
         if delete_channel:
             tasks.append(self.channel.delete())
